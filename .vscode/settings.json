@@ -1,0 +1,7 @@
+{
+ "java.project.referencedLibraries": [
+   "C:/Users/ankit/Downloads/jakarta.servlet-api-6.1.0.jar",
+   "C:/mysql-connector-j-8.4.0/mysql-connector-j-8.4.0.jar"
+ ],
+ 
+}
