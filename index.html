@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Email Spam Detector</title>
+
+<style>
+
+body{
+margin:0;
+font-family:Arial;
+background:#eef2ff;
+}
+
+.header{
+background:#312e81;
+color:white;
+padding:20px;
+text-align:center;
+font-size:30px;
+font-weight:bold;
+}
+
+.container{
+max-width:950px;
+margin:40px auto;
+background:white;
+padding:35px;
+border-radius:20px;
+box-shadow:0 10px 30px rgba(0,0,0,.15);
+}
+
+label{
+font-weight:bold;
+display:block;
+margin-top:20px;
+}
+
+input,textarea{
+width:100%;
+padding:14px;
+margin-top:8px;
+font-size:16px;
+border:1px solid #ccc;
+border-radius:10px;
+}
+
+textarea{
+height:100px;
+}
+
+.buttons{
+margin-top:30px;
+display:flex;
+gap:15px;
+flex-wrap:wrap;
+}
+
+button{
+padding:14px 22px;
+border:none;
+border-radius:10px;
+background:#4f46e5;
+color:white;
+font-size:16px;
+font-weight:bold;
+cursor:pointer;
+}
+
+button:hover{
+background:#3730a3;
+}
+
+.output{
+margin-top:35px;
+background:#f8fafc;
+border:1px solid #ddd;
+padding:20px;
+height:320px;
+overflow:auto;
+border-radius:12px;
+line-height:1.6;
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="header">
+📧 Email Spam Detector Dashboard
+</div>
+
+<div class="container">
+
+<form id="spamForm">
+
+<label>Email ID</label>
+<input type="text" name="email">
+
+<label>Message (TYPE: message)</label>
+<textarea name="message"></textarea>
+
+<label>Timestamp</label>
+<input type="text" name="time">
+
+<div class="buttons">
+
+<button type="submit">
+Detect
+</button>
+
+<button type="reset">
+Clear
+</button>
+
+<button type="button"
+onclick="sortTime()">
+Sort by Time
+</button>
+
+<button type="button"
+onclick="sortType()">
+Sort by Alert Type
+</button>
+
+</div>
+
+</form>
+
+<div class="output" id="result">
+Alerts appear here...
+</div>
+
+</div>
+
+<script>
+
+document.getElementById("spamForm")
+.addEventListener("submit",function(e){
+
+e.preventDefault();
+
+let data=
+new URLSearchParams();
+
+data.append(
+"email",
+document.querySelector('[name=email]').value
+);
+
+data.append(
+"message",
+document.querySelector('[name=message]').value
+);
+
+data.append(
+"time",
+document.querySelector('[name=time]').value
+);
+
+fetch("spam",{
+method:"POST",
+headers:{
+"Content-Type":
+"application/x-www-form-urlencoded"
+},
+body:data.toString()
+})
+.then(r=>r.text())
+.then(d=>{
+document.getElementById("result").innerHTML=d;
+});
+
+});
+
+function sortTime(){
+
+fetch("spam?action=time")
+.then(r=>r.text())
+.then(d=>{
+document.getElementById("result").innerHTML=d;
+});
+
+}
+
+function sortType(){
+
+fetch("spam?action=type")
+.then(r=>r.text())
+.then(d=>{
+document.getElementById("result").innerHTML=d;
+});
+
+}
+
+</script>
+
+</body>
+</html>
