@@ -7,7 +7,8 @@ import jakarta.servlet.http.*;
 import jakarta.servlet.annotation.WebServlet;
 
 
-/* -------- EMAIL ALERT CLASS -------- */
+
+/* ---------- EMAIL ALERT ---------- */
 
 class EmailAlert {
 
@@ -34,7 +35,7 @@ this.timestamp=timestamp;
 
 
 
-/* -------- ALERT TYPE COMPARATOR -------- */
+/* ---------- ALERT TYPE COMPARATOR ---------- */
 
 class AlertTypeComparator
 implements Comparator<EmailAlert>{
@@ -55,7 +56,7 @@ b.alertType
 
 
 
-/* -------- TIME COMPARATOR -------- */
+/* ---------- TIME COMPARATOR ---------- */
 
 class TimeComparator
 implements Comparator<EmailAlert>{
@@ -77,12 +78,10 @@ b.timestamp
 
 
 
+
 @WebServlet("/spam")
 public class SpamServlet extends HttpServlet {
 
-
-ArrayList<EmailAlert> alerts=
-new ArrayList<>();
 
 
 
@@ -96,6 +95,7 @@ response.setContentType(
 );
 
 try{
+
 
 String email=
 request.getParameter(
@@ -114,7 +114,7 @@ request.getParameter(
 
 
 
-/* -------- EXCEPTION HANDLING -------- */
+/* ---------- EXCEPTION HANDLING ---------- */
 
 if(email==null || email.isBlank()
 || message==null || message.isBlank()
@@ -137,7 +137,7 @@ throw new Exception(
 
 
 
-/* -------- GET ALERT TYPE -------- */
+/* ---------- GET TYPE ---------- */
 
 String type=
 message.substring(
@@ -147,25 +147,11 @@ message.indexOf(":")
 
 
 
-/* -------- STORE IN ARRAYLIST -------- */
 
-EmailAlert alert=
-new EmailAlert(
-email,
-type,
-message,
-time
-);
-
-alerts.add(alert);
-
-
-
-/* -------- SQLITE CONNECTION -------- */
+/* ---------- DB CONNECTION ---------- */
 
 Connection con=
 DBConnection.getConnection();
-
 
 if(con==null){
 
@@ -177,30 +163,8 @@ throw new Exception(
 
 
 
-/* -------- CREATE TABLE -------- */
 
-Statement st=
-con.createStatement();
-
-st.executeUpdate(
-
-"CREATE TABLE IF NOT EXISTS email_alerts("+
-
-"id SERIAL PRIMARY KEY,"+
-
-"email_id TEXT,"+
-
-"alert_type TEXT,"+
-
-"content TEXT,"+
-
-"timestamp TEXT)"
-
-);
-
-
-
-/* -------- INSERT INTO DB -------- */
+/* ---------- INSERT INTO POSTGRES ---------- */
 
 PreparedStatement ps=
 con.prepareStatement(
@@ -218,7 +182,18 @@ ps.executeUpdate();
 
 
 
-/* -------- SHOW ONLY SPAM ALERTS -------- */
+
+/* ---------- FETCH ONLY SPAM ALERTS ---------- */
+
+PreparedStatement spamPs=
+con.prepareStatement(
+
+"SELECT * FROM email_alerts WHERE UPPER(alert_type)='SPAM'"
+
+);
+
+ResultSet rs=
+spamPs.executeQuery();
 
 PrintWriter out=
 response.getWriter();
@@ -226,27 +201,37 @@ response.getWriter();
 StringBuffer sb=
 new StringBuffer();
 
-for(EmailAlert a : alerts){
 
-if(a.alertType.equalsIgnoreCase(
-"SPAM"
-)){
+
+while(rs.next()){
 
 sb.append(
 "📩 Email: "
-).append(a.emailId)
+)
+.append(
+rs.getString("email_id")
+)
 
 .append(
 "<br>⚠ Type: "
-).append(a.alertType)
+)
+.append(
+rs.getString("alert_type")
+)
 
 .append(
 "<br>📝 Message: "
-).append(a.content)
+)
+.append(
+rs.getString("content")
+)
 
 .append(
 "<br>⏰ Time: "
-).append(a.timestamp)
+)
+.append(
+rs.getString("timestamp")
+)
 
 .append(
 "<br>-----------------------------<br>"
@@ -254,7 +239,6 @@ sb.append(
 
 }
 
-}
 
 out.println(
 sb.toString()
@@ -265,16 +249,18 @@ con.close();
 }
 
 
+
 catch(SQLException e){
 
 response.getWriter().println(
 
-"Database Error: "
-+e.getMessage()
+"Database Error: "+
+e.getMessage()
 
 );
 
 }
+
 
 
 catch(Exception e){
@@ -286,6 +272,7 @@ e.getMessage()
 }
 
 }
+
 
 
 
@@ -309,7 +296,65 @@ request.getParameter(
 try{
 
 
-/* -------- SORTING -------- */
+Connection con=
+DBConnection.getConnection();
+
+if(con==null){
+
+throw new Exception(
+"Database connection failed"
+);
+
+}
+
+
+
+/* ---------- FETCH FROM DATABASE ---------- */
+
+String query=
+"SELECT * FROM email_alerts";
+
+
+PreparedStatement ps=
+con.prepareStatement(
+query
+);
+
+ResultSet rs=
+ps.executeQuery();
+
+
+
+/* ---------- STORE INTO ARRAYLIST ---------- */
+
+ArrayList<EmailAlert> alerts=
+new ArrayList<>();
+
+
+while(rs.next()){
+
+alerts.add(
+
+new EmailAlert(
+
+rs.getString("email_id"),
+
+rs.getString("alert_type"),
+
+rs.getString("content"),
+
+rs.getString("timestamp")
+
+)
+
+);
+
+}
+
+
+
+
+/* ---------- SORTING ---------- */
 
 if("time".equals(action)){
 
@@ -332,7 +377,7 @@ new AlertTypeComparator()
 
 
 
-/* -------- DISPLAY ALL -------- */
+/* ---------- DISPLAY ---------- */
 
 PrintWriter out=
 response.getWriter();
@@ -370,7 +415,10 @@ out.println(
 sb.toString()
 );
 
+con.close();
+
 }
+
 
 
 catch(Exception e){
