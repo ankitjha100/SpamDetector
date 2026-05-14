@@ -6,15 +6,26 @@ public static Connection getConnection(){
 
 try{
 
-Class.forName("org.sqlite.JDBC");
-
-return DriverManager.getConnection(
-"jdbc:sqlite:spamdb.db"
+Class.forName(
+"org.postgresql.Driver"
 );
 
-}catch(Exception e){
+return DriverManager.getConnection(
+
+"jdbc:postgresql://localhost:5432/spamdb",
+
+"postgres",
+
+"Ankit"
+
+);
+
+}
+catch(Exception e){
+
 e.printStackTrace();
 return null;
+
 }
 
 }
