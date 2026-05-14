@@ -12,11 +12,11 @@ Class.forName(
 
 return DriverManager.getConnection(
 
-"jdbc:postgresql://localhost:5432/spamdb",
+"jdbc:postgresql://dpg-d82o5v0g4nts73b6tc8g-a.oregon-postgres.render.com:5432/spamdb_x7m4",
 
-"postgres",
+"spamuser",
 
-"Ankit"
+"fTY2RXXuvoqvRb9BeNjkxJBfI3zV3Fqp"
 
 );
 
