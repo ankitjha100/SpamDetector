@@ -186,7 +186,7 @@ st.executeUpdate(
 
 "CREATE TABLE IF NOT EXISTS email_alerts("+
 
-"id INTEGER PRIMARY KEY AUTOINCREMENT,"+
+"id SERIAL PRIMARY KEY,"+
 
 "email_id TEXT,"+
 
